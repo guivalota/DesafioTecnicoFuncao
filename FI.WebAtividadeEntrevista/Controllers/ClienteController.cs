@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
+using System.Net;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -38,7 +39,6 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                
                 model.Id = bo.Incluir(new Cliente()
                 {                    
                     CEP = model.CEP,
@@ -49,11 +49,20 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = model.Nacionalidade,
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
+                    Telefone = model.Telefone,
+                    CPF = model.CPF
                 });
 
-           
-                return Json("Cadastro efetuado com sucesso");
+                if (model.Id != -1)
+                {
+                    Response.StatusCode = 200;
+                    return Json("Cadastro efetuado com sucesso");
+                }
+                else
+                {
+                    Response.StatusCode = 400;
+                    return Json("Este CPF já está cadastrado para outro usuário");
+                }
             }
         }
 
@@ -69,7 +78,7 @@ namespace WebAtividadeEntrevista.Controllers
                                       select error.ErrorMessage).ToList();
 
                 Response.StatusCode = 400;
-                return Json(string.Join(Environment.NewLine, erros));
+                return Json(new { Success = false, Message = string.Join(Environment.NewLine, erros) });
             }
             else
             {
@@ -84,10 +93,14 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = model.Nacionalidade,
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
+                    Telefone = model.Telefone,
+                    CPF = model.CPF
                 });
-                               
-                return Json("Cadastro alterado com sucesso");
+
+                if (model.Id != -1)
+                    return Json(new { Success = true, Message = "Cadastro efetuado com sucesso" });
+                else
+                    return Json(new { Success = false, Message = "Este CPF já está cadastrado para outro usuário" });
             }
         }
 
@@ -111,7 +124,8 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = cliente.Nacionalidade,
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
-                    Telefone = cliente.Telefone
+                    Telefone = cliente.Telefone,
+                    CPF = cliente.CPF
                 };
 
             

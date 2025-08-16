@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FI.AtividadeEntrevista.BLL.Validations;
 
 namespace FI.AtividadeEntrevista.BLL
 {
@@ -14,8 +15,14 @@ namespace FI.AtividadeEntrevista.BLL
         /// <param name="cliente">Objeto de cliente</param>
         public long Incluir(DML.Cliente cliente)
         {
+            //Normalizar os dados (do CPF)
+            //Verificaria os padrões utilizados no projeto para normalizar os dados antes da inclusão (como telefones, etc)
+            cliente.CPF = CPFNormalizer.NormalizeCPF(cliente.CPF);
             DAL.DaoCliente cli = new DAL.DaoCliente();
-            return cli.Incluir(cliente);
+            if (!cli.VerificarExistencia(cliente.CPF))
+                return cli.Incluir(cliente);
+
+            return -1;
         }
 
         /// <summary>
@@ -24,6 +31,9 @@ namespace FI.AtividadeEntrevista.BLL
         /// <param name="cliente">Objeto de cliente</param>
         public void Alterar(DML.Cliente cliente)
         {
+            //Normalizar os dados (do CPF)
+            //Verificaria os padrões utilizados no projeto para normalizar os dados antes da inclusão (como telefones, etc)
+            cliente.CPF = CPFNormalizer.NormalizeCPF(cliente.CPF);
             DAL.DaoCliente cli = new DAL.DaoCliente();
             cli.Alterar(cliente);
         }

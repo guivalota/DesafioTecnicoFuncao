@@ -1,0 +1,31 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio cache/options
+.vs/
+
+# NuGet packages
+packages/
+*.nupkg
+
+# Logs
+*.log
+
+# Backup files
+*.bak
+*.tmp
+
+# Resharper / Rider
+_ReSharper*/
+*.DotSettings
+
+# Other
+[Tt]humbs.db
+*.DS_Store

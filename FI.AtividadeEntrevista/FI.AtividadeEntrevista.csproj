@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BLL\BoCliente.cs" />
+    <Compile Include="BLL\Validations\CPFNormalizer.cs" />
     <Compile Include="DAL\Clientes\DaoCliente.cs" />
     <Compile Include="DAL\Padrao\FI.AcessoDados.cs" />
     <Compile Include="DML\Cliente.cs" />
