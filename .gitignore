@@ -29,3 +29,5 @@ _ReSharper*/
 # Other
 [Tt]humbs.db
 *.DS_Store
+/FI.AtividadeEntrevista/obj
+*.cache
