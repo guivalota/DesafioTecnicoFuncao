@@ -64,6 +64,9 @@ C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebA
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\System.Web.WebPages.Razor.dll
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\WebGrease.dll
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\FI.AtividadeEntrevista.pdb
+C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\Antlr3.Runtime.pdb
+C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\Newtonsoft.Json.xml
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\System.Web.Helpers.xml
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\System.Web.Mvc.xml
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\System.Web.Optimization.xml
@@ -71,9 +74,6 @@ C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebA
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\System.Web.WebPages.xml
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\System.Web.WebPages.Deployment.xml
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\System.Web.WebPages.Razor.xml
-C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\Newtonsoft.Json.xml
-C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\Antlr3.Runtime.pdb
-C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\obj\Debug\FI.WebAtividadeEntrevista.csproj.AssemblyReference.cache
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\obj\Debug\FI.WebAtividadeEntrevista.csproj.CoreCompileInputs.cache
 C:\Users\Guilherme\Desktop\Desafio Tecnico Função\DesafioTecnicoFuncao\FI.WebAtividadeEntrevista\obj\Debug\FI.WebAt.CEBAAAF9.Up2Date

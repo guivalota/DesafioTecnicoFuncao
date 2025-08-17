@@ -20,6 +20,7 @@ namespace WebAtividadeEntrevista.Controllers
 
         public ActionResult Incluir()
         {
+            ViewBag.IsEdit = false;
             return View();
         }
 
@@ -69,6 +70,7 @@ namespace WebAtividadeEntrevista.Controllers
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
         {
+            ViewBag.IsEdit = true;
             BoCliente bo = new BoCliente();
        
             if (!this.ModelState.IsValid)
@@ -107,6 +109,7 @@ namespace WebAtividadeEntrevista.Controllers
         [HttpGet]
         public ActionResult Alterar(long id)
         {
+            ViewBag.IsEdit = true;
             BoCliente bo = new BoCliente();
             Cliente cliente = bo.Consultar(id);
             Models.ClienteModel model = null;
@@ -160,5 +163,115 @@ namespace WebAtividadeEntrevista.Controllers
                 return Json(new { Result = "ERROR", Message = ex.Message });
             }
         }
+
+        [HttpPost]
+        public ActionResult IncluirBeneficiario(BeneficiarioModel model)
+        {
+            try
+            {
+                if (!this.ModelState.IsValid)
+                {
+                    List<string> erros = (from item in ModelState.Values
+                                          from error in item.Errors
+                                          select error.ErrorMessage).ToList();
+
+                    Response.StatusCode = 400;
+                    return Json(string.Join(Environment.NewLine, erros));
+                }
+                else
+                {
+                    BoBeneficiario bo = new BoBeneficiario();
+
+                    model.Id = bo.Incluir(new Beneficiario()
+                    {
+                        Nome = model.Nome,
+                        CPF = model.CPF,
+                        IdCliente = model.IdCliente
+                    });
+
+                    if (model.Id != -1)
+                    {
+                        Response.StatusCode = 200;
+                        return Json("Cadastro efetuado com sucesso");
+                    }
+                    else
+                    {
+                        Response.StatusCode = 400;
+                        return Json("Este CPF já está cadastrado para outro usuário");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AlterarBeneficiario(Beneficiario model)
+        {
+            ViewBag.IsEdit = true;
+            BoBeneficiario bo = new BoBeneficiario();
+
+            if (!this.ModelState.IsValid)
+            {
+                List<string> erros = (from item in ModelState.Values
+                                      from error in item.Errors
+                                      select error.ErrorMessage).ToList();
+
+                Response.StatusCode = 400;
+                return Json(new { Success = false, Message = string.Join(Environment.NewLine, erros) });
+            }
+            else
+            {
+                bo.Alterar(new Beneficiario()
+                {
+                    Id = model.Id,
+                    Nome = model.Nome,
+                    CPF = model.CPF
+                });
+
+                if (model.Id != -1)
+                    return Json(new { Success = true, Message = "Cadastro efetuado com sucesso" });
+                else
+                    return Json(new { Success = false, Message = "Este CPF já está cadastrado para outro beneficiário desse cliente" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ExcluirBeneficiario(long id, long idCliente)
+        {
+            try
+            {
+                BoBeneficiario bo = new BoBeneficiario();
+                bo.Excluir(id, idCliente);
+                return Json(new { sucesso = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BeneficiarioList(long idCliente)
+        {
+            try
+            {
+                // Buscar beneficiários do cliente usando sua BLL
+                List<Beneficiario> beneficiarios = new BoBeneficiario()
+                    .Pesquisa(idCliente);
+
+                // Retorna no padrão jTable
+                return Json(new { Result = "OK", Records = beneficiarios });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Result = "ERROR", Message = ex.Message });
+            }
+        }
+
+        
+
     }
 }
