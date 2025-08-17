@@ -119,5 +119,45 @@ namespace FI.AtividadeEntrevista.BLL
                 }
             }
         }
+        public void RemoverListaTemp(int id)
+        {
+            listaBeneficiarios.RemoveAt(id);
+        }
+
+        public List<Beneficiario> PreencherListaBanco(List<Beneficiario> beneficiarios)
+        {
+            return listaBeneficiarios = beneficiarios.ToList();
+        }
+
+        public void AlterarListaBeneficiarios(long idCliente)
+        {
+            //buscar todos os Beneficiarios
+            List<Beneficiario> beneficiariosAtual = Pesquisa(idCliente);
+            var inserir = listaBeneficiarios
+            .Where(n => !beneficiariosAtual.Any(a => a.CPF == n.CPF))
+            .Select(n => {
+                n.IdCliente = idCliente;
+                return n;
+            })
+            .ToList();
+            var atualizar = listaBeneficiarios
+            .Where(n => beneficiariosAtual.Any(a => a.CPF == n.CPF))
+            .Select(n =>
+            {
+                var existente = beneficiariosAtual.First(a => a.CPF == n.CPF);
+                n.Id = existente.Id;
+                n.IdCliente = existente.IdCliente;
+                return n;
+            })
+            .ToList();
+            var deletar = beneficiariosAtual.Where(a => !listaBeneficiarios.Any(n => n.CPF == a.CPF)).ToList();
+
+            foreach (Beneficiario b in deletar)
+                Excluir(b.Id, b.IdCliente);
+            foreach (Beneficiario b in atualizar)
+                Alterar(b);
+            foreach (Beneficiario b in inserir)
+                Incluir(b);
+        }
     }
 }

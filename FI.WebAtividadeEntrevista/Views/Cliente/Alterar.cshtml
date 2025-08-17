@@ -26,7 +26,7 @@
             // Inicializa a tabela jTable
             function carregarTabelaBeneficiarios() {
                 $('#tabelaBeneficiarios tbody').empty(); // limpa antes
-                $.post('@Url.Action("BeneficiarioList","Cliente")', { idCliente: idCliente }, function (data) {
+                $.post('@Url.Action("BeneficiarioListTemp", "Cliente")', { idCliente: idCliente }, function (data) {
                     if (data.Result === "OK") {
                         data.Records.forEach(function (b) {
                             $('#tabelaBeneficiarios tbody').append(
@@ -53,39 +53,41 @@
 
             $("#btnIncluirBeneficiario").on("click", function (e) {
                 e.preventDefault();
-                var idBeneficiario = $('#formBeneficiario').data('id');
+
+                // Usa attr para garantir leitura correta
+                var idBeneficiario = $('#formBeneficiario').attr('data-id') || -1;
                 var beneficiario = {
                     Id: idBeneficiario,
                     CPF: $("#CPFBeneficiario").val(),
                     Nome: $("#NomeBeneficiario").val(),
-                    IdCliente: idCliente
+                    IdCliente: 0
                 };
 
-                var url = idBeneficiario ? '@Url.Action("AlterarBeneficiario","Cliente")' : '@Url.Action("IncluirBeneficiario","Cliente")';
+                var url =  '@Url.Action("IncluirBeneficiarioTemp", "Cliente")';
 
                 $.ajax({
                     url: url,
                     type: "POST",
                     data: beneficiario,
                     success: function (result) {
-                        alert(idBeneficiario ? "Beneficiário atualizado com sucesso!" : "Beneficiário cadastrado com sucesso!");
-                        //Atualiza a tabela de beneficiários dentro do modal
-                        $('#formBeneficiario')[0].reset();
-                        $('#formBeneficiario').removeData('id'); // limpa id para próximas inclusões
-                        $('#btnIncluirBeneficiario').text('Incluir'); // volta botão para "Incluir"
+                        alert(idBeneficiario != -1 ? "Beneficiário atualizado com sucesso!" : "Beneficiário incluido com sucesso!");
+
+                        // Atualiza a tabela de beneficiários
                         carregarTabelaBeneficiarios();
+
+                        // Reset form e limpa id
+                        $('#formBeneficiario')[0].reset();
+                        $('#formBeneficiario').removeAttr('data-id');
+
+                        // Volta botão para "Incluir"
+                        $('#btnIncluirBeneficiario').text('Incluir');
                     },
                     error: function (xhr, status, error) {
                         if (xhr.status === 400) {
-                            // Erro de validação
                             alert("Atenção: " + xhr.responseText);
-                        }
-                        else if (xhr.status === 500) {
-                            // Erro interno no servidor
+                        } else if (xhr.status === 500) {
                             alert("Erro no servidor. Tente novamente mais tarde.");
-                        }
-                        else {
-                            // Outros erros (404, timeout, etc.)
+                        } else {
                             alert("Erro inesperado (" + xhr.status + "): " + error);
                         }
                     }
@@ -102,16 +104,17 @@
                 $('#CPFBeneficiario').val(cpf);
                 $('#NomeBeneficiario').val(nome);
                 $('#formBeneficiario').data('id', idBeneficiario); // guarda id para update
+                $('#formBeneficiario').attr('data-id', idBeneficiario);
 
                 // Muda o botão para "Atualizar"
                 $('#btnIncluirBeneficiario').text('Atualizar');
             });
 
             $(document).on('click', '.btnExcluir', function () {
-            var linha = $(this).closest('tr');
-            var idBeneficiario = linha.data('id');
+                var linha = $(this).closest('tr');
+                var idBeneficiario = linha.data('id');
                 if (confirm('Deseja realmente excluir este beneficiário?')) {
-                    $.post('@Url.Action("ExcluirBeneficiario","Cliente")', { id: idBeneficiario, idCliente: idCliente  }, function (res) {
+                    $.post('@Url.Action("ExcluirBeneficiarioTemp", "Cliente")', { id: idBeneficiario  }, function (res) {
                         if (res.sucesso) {
                             alert('Beneficiário excluído com sucesso!');
                             linha.remove(); // remove a linha da tabela
@@ -121,6 +124,9 @@
                     });
                 }
             });
+
+
+
         });
 
 

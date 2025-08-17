@@ -33,13 +33,12 @@ namespace WebAtividadeEntrevista.Controllers
             return View();
         }
 
-
         public ActionResult Incluir()
         {
+            Session[SessionBeneficiario] = null;
             ViewBag.IsEdit = false;
             return View();
         }
-
 
         [HttpPost]
         public JsonResult Incluir(ClienteModel model)
@@ -124,7 +123,10 @@ namespace WebAtividadeEntrevista.Controllers
                 });
 
                 if (model.Id != -1)
+                {
+                    boBeneficiario.AlterarListaBeneficiarios(model.Id);
                     return Json(new { Success = true, Message = "Cadastro efetuado com sucesso" });
+                }
                 else
                     return Json(new { Success = false, Message = "Este CPF já está cadastrado para outro usuário" });
             }
@@ -154,7 +156,7 @@ namespace WebAtividadeEntrevista.Controllers
                     CPF = cliente.CPF
                 };
 
-            
+                BeneficiarioListBanco(model.Id);
             }
 
             return View(model);
@@ -274,6 +276,12 @@ namespace WebAtividadeEntrevista.Controllers
                 return Json(new { sucesso = false, mensagem = ex.Message });
             }
         }
+        [HttpPost]
+        public JsonResult ExcluirBeneficiarioTemp(int id)
+        {
+            boBeneficiario.RemoverListaTemp(id);
+            return Json(new { sucesso = true });
+        }
 
         [HttpPost]
         public JsonResult AlterarBeneficiario(Beneficiario model)
@@ -341,6 +349,21 @@ namespace WebAtividadeEntrevista.Controllers
             catch (Exception ex)
             {
                 return Json(new { Result = "ERROR", Message = ex.Message });
+            }
+        }
+
+        public void BeneficiarioListBanco(long idCliente)
+        {
+            try
+            {
+                // Buscar beneficiários do cliente usando sua BLL
+                List<Beneficiario> beneficiarios = new BoBeneficiario()
+                    .Pesquisa(idCliente);
+                boBeneficiario.PreencherListaBanco(beneficiarios);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro:{ex}");
             }
         }
 

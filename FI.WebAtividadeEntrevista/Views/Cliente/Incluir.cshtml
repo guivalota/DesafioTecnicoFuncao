@@ -57,7 +57,7 @@
                 IdCliente: 0
             };
 
-            var url =  '@Url.Action("IncluirBeneficiarioTemp","Cliente")';
+            var url =  '@Url.Action("IncluirBeneficiarioTemp", "Cliente")';
 
             $.ajax({
                 url: url,
@@ -102,6 +102,21 @@
 
             // Muda o botão para "Atualizar"
             $('#btnIncluirBeneficiario').text('Atualizar');
+        });
+
+        $(document).on('click', '.btnExcluir', function () {
+            var linha = $(this).closest('tr');
+            var idBeneficiario = linha.data('id');
+            if (confirm('Deseja realmente excluir este beneficiário?')) {
+                $.post('@Url.Action("ExcluirBeneficiarioTemp", "Cliente")', { id: idBeneficiario  }, function (res) {
+                    if (res.sucesso) {
+                        alert('Beneficiário excluído com sucesso!');
+                        linha.remove(); // remove a linha da tabela
+                    } else {
+                        alert('Erro: ' + res.mensagem);
+                    }
+                });
+            }
         });
 
     </script>
