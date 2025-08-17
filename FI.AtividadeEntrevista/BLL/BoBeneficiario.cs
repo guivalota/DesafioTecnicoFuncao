@@ -129,6 +129,15 @@ namespace FI.AtividadeEntrevista.BLL
             return listaBeneficiarios = beneficiarios.ToList();
         }
 
+        public void IncluirListaBeneficiarios(long idCliente)
+        {
+            foreach (Beneficiario b in listaBeneficiarios)
+            {
+                b.IdCliente = idCliente;
+                Incluir(b);
+            }
+        }
+
         public void AlterarListaBeneficiarios(long idCliente)
         {
             //buscar todos os Beneficiarios

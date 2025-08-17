@@ -43,7 +43,6 @@ namespace WebAtividadeEntrevista.Controllers
         [HttpPost]
         public JsonResult Incluir(ClienteModel model)
         {
-           
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
@@ -71,16 +70,8 @@ namespace WebAtividadeEntrevista.Controllers
 
                 if (model.Id != -1)
                 {
-                    //incluir os beneficiarios
-                    List<Beneficiario> beneficiarios = boBeneficiario.PesquisaTemp();
-                    foreach(Beneficiario b in beneficiarios)
-                    {
-                        b.IdCliente = model.Id;
-                        if (IncluirBeneficiarioInterno(b))
-                        {
-                            //Faria algum tipo de tratamento se controlasse a conection, daria um rollback
-                        }
-                    }
+                    boBeneficiario.IncluirListaBeneficiarios(model.Id);
+                    Session[SessionBeneficiario] = null;
                     Response.StatusCode = 200;
                     return Json("Cadastro efetuado com sucesso");
                 }
@@ -189,53 +180,6 @@ namespace WebAtividadeEntrevista.Controllers
             }
         }
 
-        private bool IncluirBeneficiarioInterno(Beneficiario b)
-        {
-            b.Id = boBeneficiario.Incluir(b);
-            return b.Id != -1;
-        }
-
-        [HttpPost]
-        public ActionResult IncluirBeneficiario(BeneficiarioModel model)
-        {
-            try
-            {
-                if (!this.ModelState.IsValid)
-                {
-                    List<string> erros = (from item in ModelState.Values
-                                          from error in item.Errors
-                                          select error.ErrorMessage).ToList();
-
-                    Response.StatusCode = 400;
-                    return Json(string.Join(Environment.NewLine, erros));
-                }
-                else
-                {
-                    model.Id = boBeneficiario.Incluir(new Beneficiario()
-                    {
-                        Nome = model.Nome,
-                        CPF = model.CPF,
-                        IdCliente = model.IdCliente
-                    });
-
-                    if (model.Id != -1)
-                    {
-                        Response.StatusCode = 200;
-                        return Json("Cadastro efetuado com sucesso");
-                    }
-                    else
-                    {
-                        Response.StatusCode = 400;
-                        return Json("Este CPF já está cadastrado para outro usuário");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { sucesso = false, mensagem = ex.Message });
-            }
-        }
-
         [HttpPost]
         public ActionResult IncluirBeneficiarioTemp(BeneficiarioModel model)
         {
@@ -283,76 +227,7 @@ namespace WebAtividadeEntrevista.Controllers
             return Json(new { sucesso = true });
         }
 
-        [HttpPost]
-        public JsonResult AlterarBeneficiario(Beneficiario model)
-        {
-            ViewBag.IsEdit = true;
-            BoBeneficiario bo = new BoBeneficiario();
-
-            if (!this.ModelState.IsValid)
-            {
-                List<string> erros = (from item in ModelState.Values
-                                      from error in item.Errors
-                                      select error.ErrorMessage).ToList();
-
-                Response.StatusCode = 400;
-                return Json(new { Success = false, Message = string.Join(Environment.NewLine, erros) });
-            }
-            else
-            {
-                if (bo.Alterar(new Beneficiario()
-                {
-                    Id = model.Id,
-                    Nome = model.Nome,
-                    CPF = model.CPF,
-                    IdCliente = model.IdCliente,
-                }))
-                {
-                    Response.StatusCode = 200;
-                    return Json("Cadastro efetuado com sucesso");
-                }
-                else
-                {
-                    Response.StatusCode = 400;
-                    return Json("Este CPF já está cadastrado para outro beneficiário");
-                }
-            }
-        }
-
-        [HttpPost]
-        public JsonResult ExcluirBeneficiario(long id, long idCliente)
-        {
-            try
-            {
-                BoBeneficiario bo = new BoBeneficiario();
-                bo.Excluir(id, idCliente);
-                return Json(new { sucesso = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { sucesso = false, mensagem = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public JsonResult BeneficiarioList(long idCliente)
-        {
-            try
-            {
-                // Buscar beneficiários do cliente usando sua BLL
-                List<Beneficiario> beneficiarios = new BoBeneficiario()
-                    .Pesquisa(idCliente);
-
-                // Retorna no padrão jTable
-                return Json(new { Result = "OK", Records = beneficiarios });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { Result = "ERROR", Message = ex.Message });
-            }
-        }
-
-        public void BeneficiarioListBanco(long idCliente)
+        private void BeneficiarioListBanco(long idCliente)
         {
             try
             {
