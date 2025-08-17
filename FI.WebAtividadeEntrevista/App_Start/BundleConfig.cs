@@ -45,6 +45,8 @@ namespace FI.WebAtividadeEntrevista
 
             bundles.Add(new StyleBundle("~/Content/jtable").Include(
                       "~/Scripts/jtable/themes/metro/darkgray/jtable.css"));
+
+            BundleTable.EnableOptimizations = false;
         }
     }
 }

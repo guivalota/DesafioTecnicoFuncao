@@ -224,17 +224,22 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                bo.Alterar(new Beneficiario()
+                if (bo.Alterar(new Beneficiario()
                 {
                     Id = model.Id,
                     Nome = model.Nome,
-                    CPF = model.CPF
-                });
-
-                if (model.Id != -1)
-                    return Json(new { Success = true, Message = "Cadastro efetuado com sucesso" });
+                    CPF = model.CPF,
+                    IdCliente = model.IdCliente,
+                }))
+                {
+                    Response.StatusCode = 200;
+                    return Json("Cadastro efetuado com sucesso");
+                }
                 else
-                    return Json(new { Success = false, Message = "Este CPF já está cadastrado para outro beneficiário desse cliente" });
+                {
+                    Response.StatusCode = 400;
+                    return Json("Este CPF já está cadastrado para outro beneficiário");
+                }
             }
         }
 

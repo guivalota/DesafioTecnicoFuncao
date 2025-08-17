@@ -27,12 +27,22 @@ namespace FI.AtividadeEntrevista.BLL
         /// Altera um cliente
         /// </summary>
         /// <param name="beneficiario">Objeto de beneficiario</param>
-        public void Alterar(DML.Beneficiario beneficiario)
+        public bool Alterar(DML.Beneficiario beneficiario)
         {
             //Normalizar os dados (do CPF)
             beneficiario.CPF = CPFNormalizer.NormalizeCPF(beneficiario.CPF);
             DAL.DaoBeneficiario dal = new DAL.DaoBeneficiario();
-            dal.Alterar(beneficiario);
+            //verificar se existe outro
+            //if (!dal.VerificarExistencia(beneficiario.CPF,beneficiario.IdCliente))
+            //{
+                //verificar se não é ele mesmo
+                if (dal.VerificarExistenciaAlteracao(beneficiario.CPF, beneficiario.IdCliente, beneficiario.Id))
+                {
+                    dal.Alterar(beneficiario);
+                    return true;
+                }
+            //}
+            return false;
         }
 
         /// <summary>

@@ -41,6 +41,19 @@ namespace FI.AtividadeEntrevista.DAL
             return ds.Tables[0].Rows.Count > 0;
         }
 
+        internal bool VerificarExistenciaAlteracao(string CPF, long idCliente, long id)
+        {
+            List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
+
+            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", CPF));
+            parametros.Add(new System.Data.SqlClient.SqlParameter("IDCLIENTE", idCliente));
+            parametros.Add(new System.Data.SqlClient.SqlParameter("ID", id));
+
+            DataSet ds = base.Consultar("FI_SP_VerificaBenfAlt", parametros);
+
+            return ds.Tables[0].Rows.Count > 0;
+        }
+
         internal List<Beneficiario> Pesquisa(long idCliente)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
