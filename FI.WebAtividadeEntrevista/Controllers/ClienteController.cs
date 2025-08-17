@@ -7,13 +7,29 @@ using System.Web;
 using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
 using System.Net;
+using System.Reflection;
 
 namespace WebAtividadeEntrevista.Controllers
 {
     public class ClienteController : Controller
     {
+        private const string SessionBeneficiario = "SessionBeneficiario";
+        private BoBeneficiario boBeneficiario
+        {
+            get
+            {
+                if (Session[SessionBeneficiario] == null)
+                {
+                    Session[SessionBeneficiario] = new BoBeneficiario();
+                }
+                return (BoBeneficiario)Session[SessionBeneficiario];
+            }
+            set { Session[SessionBeneficiario] = value; }
+        }
+        private BoCliente boCliente = new BoCliente();
         public ActionResult Index()
         {
+            Session[SessionBeneficiario] = null;
             return View();
         }
 
@@ -24,11 +40,11 @@ namespace WebAtividadeEntrevista.Controllers
             return View();
         }
 
+
         [HttpPost]
         public JsonResult Incluir(ClienteModel model)
         {
-            BoCliente bo = new BoCliente();
-            
+           
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
@@ -40,7 +56,7 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                model.Id = bo.Incluir(new Cliente()
+                model.Id = boCliente.Incluir(new Cliente()
                 {                    
                     CEP = model.CEP,
                     Cidade = model.Cidade,
@@ -56,6 +72,16 @@ namespace WebAtividadeEntrevista.Controllers
 
                 if (model.Id != -1)
                 {
+                    //incluir os beneficiarios
+                    List<Beneficiario> beneficiarios = boBeneficiario.PesquisaTemp();
+                    foreach(Beneficiario b in beneficiarios)
+                    {
+                        b.IdCliente = model.Id;
+                        if (IncluirBeneficiarioInterno(b))
+                        {
+                            //Faria algum tipo de tratamento se controlasse a conection, daria um rollback
+                        }
+                    }
                     Response.StatusCode = 200;
                     return Json("Cadastro efetuado com sucesso");
                 }
@@ -71,8 +97,6 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Alterar(ClienteModel model)
         {
             ViewBag.IsEdit = true;
-            BoCliente bo = new BoCliente();
-       
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
@@ -84,7 +108,7 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                bo.Alterar(new Cliente()
+                boCliente.Alterar(new Cliente()
                 {
                     Id = model.Id,
                     CEP = model.CEP,
@@ -110,8 +134,7 @@ namespace WebAtividadeEntrevista.Controllers
         public ActionResult Alterar(long id)
         {
             ViewBag.IsEdit = true;
-            BoCliente bo = new BoCliente();
-            Cliente cliente = bo.Consultar(id);
+            Cliente cliente = boCliente.Consultar(id);
             Models.ClienteModel model = null;
 
             if (cliente != null)
@@ -164,6 +187,12 @@ namespace WebAtividadeEntrevista.Controllers
             }
         }
 
+        private bool IncluirBeneficiarioInterno(Beneficiario b)
+        {
+            b.Id = boBeneficiario.Incluir(b);
+            return b.Id != -1;
+        }
+
         [HttpPost]
         public ActionResult IncluirBeneficiario(BeneficiarioModel model)
         {
@@ -180,9 +209,7 @@ namespace WebAtividadeEntrevista.Controllers
                 }
                 else
                 {
-                    BoBeneficiario bo = new BoBeneficiario();
-
-                    model.Id = bo.Incluir(new Beneficiario()
+                    model.Id = boBeneficiario.Incluir(new Beneficiario()
                     {
                         Nome = model.Nome,
                         CPF = model.CPF,
@@ -193,6 +220,47 @@ namespace WebAtividadeEntrevista.Controllers
                     {
                         Response.StatusCode = 200;
                         return Json("Cadastro efetuado com sucesso");
+                    }
+                    else
+                    {
+                        Response.StatusCode = 400;
+                        return Json("Este CPF já está cadastrado para outro usuário");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult IncluirBeneficiarioTemp(BeneficiarioModel model)
+        {
+            try
+            {
+                if (!this.ModelState.IsValid)
+                {
+                    List<string> erros = (from item in ModelState.Values
+                                          from error in item.Errors
+                                          select error.ErrorMessage).ToList();
+
+                    Response.StatusCode = 400;
+                    return Json(string.Join(Environment.NewLine, erros));
+                }
+                else
+                {
+                    model.Id = boBeneficiario.AdicionarOuAtualizarBeneficiario(new Beneficiario()
+                    {
+                        Id = model.Id,
+                        Nome = model.Nome,
+                        CPF = model.CPF
+                    });
+
+                    if (model.Id != -1)
+                    {
+                        Response.StatusCode = 200;
+                        return Json("Beneficiario adicionado efetuado com sucesso");
                     }
                     else
                     {
@@ -276,7 +344,16 @@ namespace WebAtividadeEntrevista.Controllers
             }
         }
 
-        
+        [HttpPost]
+        public JsonResult BeneficiarioListTemp()
+        {
 
+            // Buscar beneficiários do cliente usando sua BLL
+            List<Beneficiario> beneficiarios = boBeneficiario.PesquisaTemp();
+
+            // Retorna no padrão jTable
+            return Json(new { Result = "OK", Records = beneficiarios });
+
+        }
     }
 }

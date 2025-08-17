@@ -5,15 +5,159 @@
 @section scripts{
     <script>
         var urlPost = '@Url.Action("Incluir", "Cliente", new { area = "" })';
-    </script>
-    <script>
         $(function () {
             $('#CPF').mask('000.000.000-00');
             $('#CEP').mask('00000-000');
             $('#Telefone').mask('(00) 00000-0000');
+            $('#CPFBeneficiario').mask('000.000.000-00');
         });
+
+        function abrirModalBeneficiario() {
+            $("#modalBeneficiario").modal("show");
+        }
+
+        // Inicializa a tabela jTable
+        function carregarTabelaBeneficiarios() {
+            $('#tabelaBeneficiarios tbody').empty();
+            $.post('@Url.Action("BeneficiarioListTemp","Cliente")', function (data) {
+                if (data.Result === "OK") {
+                    var coun = 0;
+                    data.Records.forEach(function (b) {
+                        $('#tabelaBeneficiarios tbody').append(
+                            '<tr data-id="' + b.Id + '">' +
+                            '<td>' + b.CPF + '</td>' +
+                            '<td>' + b.Nome + '</td>' +
+                            '<td>' +
+                            '<button class="btn btn-md btn-primary align-items-start btnAlterar">Alterar</button> ' +
+                            '<button class="btn btn-md btn-primary align-items-start btnExcluir">Excluir</button>' +
+                            '</td>' +
+                            '</tr>'
+                        );
+                    });
+                } else {
+                    alert("Erro ao carregar beneficiários: " + data.Message);
+                }
+            });
+        }
+
+        // Carrega a tabela quando o modal abrir
+        $('#modalBeneficiario').on('show.bs.modal', function () {
+            carregarTabelaBeneficiarios();
+        });
+
+        $("#btnIncluirBeneficiario").on("click", function (e) {
+            e.preventDefault();
+
+            // Usa attr para garantir leitura correta
+            var idBeneficiario = $('#formBeneficiario').attr('data-id') || -1;
+            var beneficiario = {
+                Id: idBeneficiario,
+                CPF: $("#CPFBeneficiario").val(),
+                Nome: $("#NomeBeneficiario").val(),
+                IdCliente: 0
+            };
+
+            var url =  '@Url.Action("IncluirBeneficiarioTemp","Cliente")';
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: beneficiario,
+                success: function (result) {
+                    alert(idBeneficiario != -1 ? "Beneficiário atualizado com sucesso!" : "Beneficiário incluido com sucesso!");
+
+                    // Atualiza a tabela de beneficiários
+                    carregarTabelaBeneficiarios();
+
+                    // Reset form e limpa id
+                    $('#formBeneficiario')[0].reset();
+                    $('#formBeneficiario').removeAttr('data-id');
+
+                    // Volta botão para "Incluir"
+                    $('#btnIncluirBeneficiario').text('Incluir');
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 400) {
+                        alert("Atenção: " + xhr.responseText);
+                    } else if (xhr.status === 500) {
+                        alert("Erro no servidor. Tente novamente mais tarde.");
+                    } else {
+                        alert("Erro inesperado (" + xhr.status + "): " + error);
+                    }
+                }
+            });
+        });
+
+        $(document).on('click', '.btnAlterar', function () {
+            var linha = $(this).closest('tr');
+            var idBeneficiario = linha.data('id');
+            var cpf = linha.find('td:eq(0)').text();
+            var nome = linha.find('td:eq(1)').text();
+
+            // Preenche o form
+            $('#CPFBeneficiario').val(cpf);
+            $('#NomeBeneficiario').val(nome);
+            $('#formBeneficiario').data('id', idBeneficiario); // guarda id para update
+            $('#formBeneficiario').attr('data-id', idBeneficiario);
+
+            // Muda o botão para "Atualizar"
+            $('#btnIncluirBeneficiario').text('Atualizar');
+        });
+
     </script>
     @Scripts.Render("~/bundles/clientes")
 }
 <h2>@Html.Raw(ViewBag.Title)</h2>
 @Html.Partial("Forms")
+
+<!-- Modal -->
+<div class="modal fade" id="modalBeneficiario" tabindex="-1" aria-labelledby="modalBeneficiarioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h4 class="modal-title">Beneficiários</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Formulário de inclusão de beneficiário -->
+                <form id="formBeneficiario">
+                    <div class="row">
+                        <div class="col-md-4 mb-0">
+                            <label for="CPFBeneficiario" class="form-label">CPF</label>
+                            <input required="required" type="text" class="form-control" id="CPFBeneficiario" name="CPFBeneficiario" placeholder="Ex.: 999.999.999-99" maxlength="14" />
+                        </div>
+                        <div class="col-md-6 mb-0">
+
+                            <label for="NomeBeneficiario" class="form-label">Nome</label>
+                            <input required="required" type="text" class="form-control" id="NomeBeneficiario" name="NomeBeneficiario" placeholder="Ex.: Maria" maxlength="50" />
+
+                        </div>
+                        <div class="col-md-2 mb-0 d-flex align-items-start">
+                            <label>&nbsp;</label>
+                            <button type="button" class="btn btn-success w-100" id="btnIncluirBeneficiario">Incluir</button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr />
+
+                <div id="divTabelaBeneficiarios">
+                    <table class="table mt-3" id="tabelaBeneficiarios">
+                        <thead>
+                            <tr>
+                                <th class="w-25">CPF</th>
+                                <th class="w-50">Nome</th>
+                                <th class="w-25">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
