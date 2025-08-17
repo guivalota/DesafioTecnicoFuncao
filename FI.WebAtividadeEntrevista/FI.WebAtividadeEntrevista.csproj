@@ -112,6 +112,7 @@
     <Compile Include="Controllers\ClienteController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Domain\Validations\CpfAttribute.cs" />
+    <Compile Include="Domain\Validations\ValidadorCPF.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

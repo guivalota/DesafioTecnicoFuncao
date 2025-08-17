@@ -29,5 +29,23 @@ namespace FI.AtividadeEntrevista.BLL.Validations
             string onlyNumbers = OnlyNumbers(cpf);
             return onlyNumbers.Length == 11 ? onlyNumbers : string.Empty;
         }
+
+        /// <summary>
+        /// Formata uma string de 11 dígitos como CPF (###.###.###-##).
+        /// </summary>
+        /// <param name="cpf">String contendo apenas números, com 11 caracteres</param>
+        /// <returns>CPF formatado (ex.: 123.456.789-01)</returns>
+        public static string FormatCPF(string cpf)
+        {
+            if (string.IsNullOrWhiteSpace(cpf))
+                throw new ArgumentException("CPF não pode ser nulo ou vazio.");
+
+            cpf = cpf.Trim();
+
+            if (cpf.Length != 11 || !cpf.All(char.IsDigit))
+                return cpf;
+
+            return $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}";
+        }
     }
 }

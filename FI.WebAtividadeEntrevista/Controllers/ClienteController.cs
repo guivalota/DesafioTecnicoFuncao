@@ -8,6 +8,7 @@ using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
 using System.Net;
 using System.Reflection;
+using FI.AtividadeEntrevista.BLL.Validations;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -54,6 +55,12 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
+                if (!ValidadorCPF.ValidarCPF(model.CPF))
+                {
+                        Response.StatusCode = 400;
+                        return Json("Informe um CPF valido");   
+                }
+
                 var retorno = boCliente.Incluir(new Cliente()
                 {                    
                     CEP = model.CEP,
@@ -93,10 +100,15 @@ namespace WebAtividadeEntrevista.Controllers
                                       select error.ErrorMessage).ToList();
 
                 Response.StatusCode = 400;
-                return Json(new { Success = false, Message = string.Join(Environment.NewLine, erros) });
+                return Json(string.Join(Environment.NewLine, erros));
             }
             else
             {
+                if (!ValidadorCPF.ValidarCPF(model.CPF))
+                {
+                    Response.StatusCode = 400;
+                    return Json("Informe um CPF valido");
+                }
                 var retorno = boCliente.Alterar(new Cliente()
                 {
                     Id = model.Id,
@@ -143,7 +155,7 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
                     Telefone = cliente.Telefone,
-                    CPF = cliente.CPF
+                    CPF = CPFNormalizer.FormatCPF(cliente.CPF)
                 };
 
                 BeneficiarioListBanco(model.Id);
@@ -169,6 +181,8 @@ namespace WebAtividadeEntrevista.Controllers
                     crescente = array[1];
 
                 List<Cliente> clientes = new BoCliente().Pesquisa(jtStartIndex, jtPageSize, campo, crescente.Equals("ASC", StringComparison.InvariantCultureIgnoreCase), out qtd);
+                foreach (Cliente cliente in clientes)
+                    cliente.CEP = CPFNormalizer.FormatCPF(cliente.CPF);
 
                 //Return result to jTable
                 return Json(new { Result = "OK", Records = clientes, TotalRecordCount = qtd });

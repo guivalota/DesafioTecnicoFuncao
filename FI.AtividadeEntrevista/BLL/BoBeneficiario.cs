@@ -101,6 +101,7 @@ namespace FI.AtividadeEntrevista.BLL
             for (int i=0; i< listaBeneficiarios.Count; i++)
             {
                 listaBeneficiarios[i].Id = i;
+                listaBeneficiarios[i].CPF = CPFNormalizer.FormatCPF(listaBeneficiarios[i].CPF);
             }
             return listaBeneficiarios;
         }
