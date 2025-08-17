@@ -54,7 +54,7 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                model.Id = boCliente.Incluir(new Cliente()
+                var retorno = boCliente.Incluir(new Cliente()
                 {                    
                     CEP = model.CEP,
                     Cidade = model.Cidade,
@@ -66,11 +66,10 @@ namespace WebAtividadeEntrevista.Controllers
                     Sobrenome = model.Sobrenome,
                     Telefone = model.Telefone,
                     CPF = model.CPF
-                });
+                }, boBeneficiario.getListaTemp());
 
-                if (model.Id != -1)
+                if (retorno)
                 {
-                    boBeneficiario.IncluirListaBeneficiarios(model.Id);
                     Session[SessionBeneficiario] = null;
                     Response.StatusCode = 200;
                     return Json("Cadastro efetuado com sucesso");
@@ -98,7 +97,7 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                boCliente.Alterar(new Cliente()
+                var retorno = boCliente.Alterar(new Cliente()
                 {
                     Id = model.Id,
                     CEP = model.CEP,
@@ -111,11 +110,11 @@ namespace WebAtividadeEntrevista.Controllers
                     Sobrenome = model.Sobrenome,
                     Telefone = model.Telefone,
                     CPF = model.CPF
-                });
+                }
+                , boBeneficiario.getListaTemp());
 
-                if (model.Id != -1)
+                if (retorno)
                 {
-                    boBeneficiario.AlterarListaBeneficiarios(model.Id);
                     return Json(new { Success = true, Message = "Cadastro efetuado com sucesso" });
                 }
                 else

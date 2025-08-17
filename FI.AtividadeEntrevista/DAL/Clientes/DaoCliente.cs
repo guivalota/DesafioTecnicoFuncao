@@ -8,8 +8,14 @@ namespace FI.AtividadeEntrevista.DAL
     /// <summary>
     /// Classe de acesso a dados de Cliente
     /// </summary>
-    internal class DaoCliente : AcessoDados
+    internal class DaoCliente
     {
+        private readonly AcessoDados _acesso;
+
+        public DaoCliente(AcessoDados acesso)
+        {
+            _acesso = acesso;
+        }
         /// <summary>
         /// Inclui um novo cliente
         /// </summary>
@@ -29,7 +35,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Telefone", cliente.Telefone));
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", cliente.CPF));
 
-            DataSet ds = base.Consultar("FI_SP_IncClienteV2", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_IncClienteV2", parametros);
             long ret = 0;
             if (ds.Tables[0].Rows.Count > 0)
                 long.TryParse(ds.Tables[0].Rows[0][0].ToString(), out ret);
@@ -46,7 +52,7 @@ namespace FI.AtividadeEntrevista.DAL
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("Id", Id));
 
-            DataSet ds = base.Consultar("FI_SP_ConsCliente", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_ConsCliente", parametros);
             List<DML.Cliente> cli = Converter(ds);
 
             return cli.FirstOrDefault();
@@ -58,7 +64,7 @@ namespace FI.AtividadeEntrevista.DAL
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", CPF));
 
-            DataSet ds = base.Consultar("FI_SP_VerificaCliente", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_VerificaCliente", parametros);
 
             return ds.Tables[0].Rows.Count > 0;
         }
@@ -72,7 +78,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("campoOrdenacao", campoOrdenacao));
             parametros.Add(new System.Data.SqlClient.SqlParameter("crescente", crescente));
 
-            DataSet ds = base.Consultar("FI_SP_PesqCliente", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_PesqCliente", parametros);
             List<DML.Cliente> cli = Converter(ds);
 
             int iQtd = 0;
@@ -94,7 +100,7 @@ namespace FI.AtividadeEntrevista.DAL
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("Id", 0));
 
-            DataSet ds = base.Consultar("FI_SP_ConsCliente", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_ConsCliente", parametros);
             List<DML.Cliente> cli = Converter(ds);
 
             return cli;
@@ -104,8 +110,11 @@ namespace FI.AtividadeEntrevista.DAL
         /// Inclui um novo cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
-        internal void Alterar(DML.Cliente cliente)
+        internal bool Alterar(DML.Cliente cliente)
         {
+            try
+            {
+
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("Nome", cliente.Nome));
@@ -120,7 +129,13 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", cliente.CPF));
             parametros.Add(new System.Data.SqlClient.SqlParameter("ID", cliente.Id));
 
-            base.Executar("FI_SP_AltCliente", parametros);
+            _acesso.Executar("FI_SP_AltCliente", parametros);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
 
@@ -134,7 +149,7 @@ namespace FI.AtividadeEntrevista.DAL
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("Id", Id));
 
-            base.Executar("FI_SP_DelCliente", parametros);
+            _acesso.Executar("FI_SP_DelCliente", parametros);
         }
 
         private List<DML.Cliente> Converter(DataSet ds)

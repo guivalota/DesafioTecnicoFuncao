@@ -8,8 +8,14 @@ using FI.AtividadeEntrevista.DML;
 
 namespace FI.AtividadeEntrevista.DAL
 {
-    internal class DaoBeneficiario : AcessoDados
+    internal class DaoBeneficiario
     {
+        private readonly AcessoDados _acesso;
+
+        public DaoBeneficiario(AcessoDados acesso)
+        {
+            _acesso = acesso;
+        }
         /// <summary>
         /// Inclui um novo beneficiario
         /// </summary>
@@ -22,7 +28,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", beneficiario.CPF));
             parametros.Add(new System.Data.SqlClient.SqlParameter("IdCliente", beneficiario.IdCliente));
 
-            DataSet ds = base.Consultar("FI_SP_IncBeneficiario", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_IncBeneficiario", parametros);
             long ret = 0;
             if (ds.Tables[0].Rows.Count > 0)
                 long.TryParse(ds.Tables[0].Rows[0][0].ToString(), out ret);
@@ -36,7 +42,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", CPF));
             parametros.Add(new System.Data.SqlClient.SqlParameter("IDCLIENTE", idCliente));
 
-            DataSet ds = base.Consultar("FI_SP_VerificaBenf", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_VerificaBenf", parametros);
 
             return ds.Tables[0].Rows.Count > 0;
         }
@@ -49,7 +55,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("IDCLIENTE", idCliente));
             parametros.Add(new System.Data.SqlClient.SqlParameter("ID", id));
 
-            DataSet ds = base.Consultar("FI_SP_VerificaBenfAlt", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_VerificaBenfAlt", parametros);
 
             return ds.Tables[0].Rows.Count > 0;
         }
@@ -60,7 +66,7 @@ namespace FI.AtividadeEntrevista.DAL
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("idCliente", idCliente));
 
-            DataSet ds = base.Consultar("FI_SP_ListarBenef", parametros);
+            DataSet ds = _acesso.Consultar("FI_SP_ListarBenef", parametros);
             List<DML.Beneficiario> benf = Converter(ds);
 
             return benf;
@@ -77,7 +83,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Id", Id));
             parametros.Add(new System.Data.SqlClient.SqlParameter("IdCliente", IdCliente));
 
-            base.Executar("FI_SP_DelBeneficiario", parametros);
+            _acesso.Executar("FI_SP_DelBeneficiario", parametros);
         }
 
         private List<DML.Beneficiario> Converter(DataSet ds)
@@ -110,7 +116,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", beneficiario.CPF));
             parametros.Add(new System.Data.SqlClient.SqlParameter("ID", beneficiario.Id));
 
-            base.Executar("FI_SP_AltBenef", parametros);
+            _acesso.Executar("FI_SP_AltBenef", parametros);
         }
     }
 }

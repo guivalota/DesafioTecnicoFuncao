@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FI.AtividadeEntrevista.BLL.Validations;
+using FI.AtividadeEntrevista.DAL;
+using FI.AtividadeEntrevista.DAL.Padrao;
 using FI.AtividadeEntrevista.DML;
 
 namespace FI.AtividadeEntrevista.BLL
@@ -19,36 +21,56 @@ namespace FI.AtividadeEntrevista.BLL
         /// Inclui um novo beneficiario
         /// </summary>
         /// <param name="beneficiario">Objeto de beneficiario</param>
-        public long Incluir(DML.Beneficiario beneficiario)
+        public long Incluir(DML.Beneficiario beneficiario, AcessoDados acesso)
         {
             beneficiario.CPF = CPFNormalizer.NormalizeCPF(beneficiario.CPF);
-            DAL.DaoBeneficiario dal = new DAL.DaoBeneficiario();
-            if (!dal.VerificarExistencia(beneficiario.CPF, beneficiario.IdCliente))
-                return dal.Incluir(beneficiario);
+            using(var conexao = new ConexaoBanco())
+            {
+                try
+                {
+                    var dal = new DaoBeneficiario(acesso);
+                    if (!dal.VerificarExistencia(beneficiario.CPF, beneficiario.IdCliente))
+                    {
+                        var retorno = dal.Incluir(beneficiario);
+                        return retorno;
+                    }
+                    return -1;
+                }
+                catch
+                {
+                    conexao.Rollback();
+                    throw;
+                }
+            }
 
-            return -1;
+
         }
 
         /// <summary>
         /// Altera um cliente
         /// </summary>
         /// <param name="beneficiario">Objeto de beneficiario</param>
-        public bool Alterar(DML.Beneficiario beneficiario)
+        public bool Alterar(DML.Beneficiario beneficiario, AcessoDados acesso)
         {
             //Normalizar os dados (do CPF)
             beneficiario.CPF = CPFNormalizer.NormalizeCPF(beneficiario.CPF);
-            DAL.DaoBeneficiario dal = new DAL.DaoBeneficiario();
-            //verificar se existe outro
-            //if (!dal.VerificarExistencia(beneficiario.CPF,beneficiario.IdCliente))
-            //{
-                //verificar se não é ele mesmo
-                if (dal.VerificarExistenciaAlteracao(beneficiario.CPF, beneficiario.IdCliente, beneficiario.Id))
+            using (var conexao = new ConexaoBanco())
+            {
+                try
                 {
-                    dal.Alterar(beneficiario);
-                    return true;
+                    var dal = new DaoBeneficiario(acesso);
+                    if (dal.VerificarExistenciaAlteracao(beneficiario.CPF, beneficiario.IdCliente, beneficiario.Id))
+                    {
+                        dal.Alterar(beneficiario);
+                        return true;
+                    }
+                    return false;
                 }
-            //}
-            return false;
+                catch
+                {
+                    throw;
+                }
+             }
         }
 
         /// <summary>
@@ -56,8 +78,22 @@ namespace FI.AtividadeEntrevista.BLL
         /// </summary>
         public List<DML.Beneficiario> Pesquisa(long idCliente)
         {
-            DAL.DaoBeneficiario dal = new DAL.DaoBeneficiario();
-            return dal.Pesquisa(idCliente);
+            using (var conexao = new ConexaoBanco())
+            {
+                try
+                {
+                    conexao.Abrir();
+                    conexao.BeginTransaction();
+                    var acesso = new AcessoDados(conexao);
+                    var dal = new DaoBeneficiario(acesso);
+                    return dal.Pesquisa(idCliente);
+                }
+                catch
+                {
+                    conexao.Rollback(); 
+                    throw;
+                }
+            }
         }
 
         public List<DML.Beneficiario>PesquisaTemp()
@@ -73,10 +109,20 @@ namespace FI.AtividadeEntrevista.BLL
         /// Excluir um beneficiario
         /// </summary>
         /// <param name="ID">Objeto de beneficiario</param>
-        public void Excluir(long ID, long IdCliente)
+        public void Excluir(long ID, long IdCliente, AcessoDados acesso)
         {
-            DAL.DaoBeneficiario dal = new DAL.DaoBeneficiario();
-            dal.Excluir(ID, IdCliente);
+            using (var conexao = new ConexaoBanco())
+            {
+                try
+                {
+                    var dal = new DaoBeneficiario(acesso);
+                    dal.Excluir(ID, IdCliente);
+                }
+                catch
+                {
+                    throw;
+                }
+            }
         }
 
         public int AdicionarOuAtualizarBeneficiario(Beneficiario novoBeneficiario)
@@ -129,44 +175,57 @@ namespace FI.AtividadeEntrevista.BLL
             return listaBeneficiarios = beneficiarios.ToList();
         }
 
-        public void IncluirListaBeneficiarios(long idCliente)
+        public List<Beneficiario> getListaTemp()
         {
-            foreach (Beneficiario b in listaBeneficiarios)
-            {
-                b.IdCliente = idCliente;
-                Incluir(b);
-            }
+            return listaBeneficiarios;
         }
 
-        public void AlterarListaBeneficiarios(long idCliente)
-        {
-            //buscar todos os Beneficiarios
-            List<Beneficiario> beneficiariosAtual = Pesquisa(idCliente);
-            var inserir = listaBeneficiarios
-            .Where(n => !beneficiariosAtual.Any(a => a.CPF == n.CPF))
-            .Select(n => {
-                n.IdCliente = idCliente;
-                return n;
-            })
-            .ToList();
-            var atualizar = listaBeneficiarios
-            .Where(n => beneficiariosAtual.Any(a => a.CPF == n.CPF))
-            .Select(n =>
-            {
-                var existente = beneficiariosAtual.First(a => a.CPF == n.CPF);
-                n.Id = existente.Id;
-                n.IdCliente = existente.IdCliente;
-                return n;
-            })
-            .ToList();
-            var deletar = beneficiariosAtual.Where(a => !listaBeneficiarios.Any(n => n.CPF == a.CPF)).ToList();
 
-            foreach (Beneficiario b in deletar)
-                Excluir(b.Id, b.IdCliente);
-            foreach (Beneficiario b in atualizar)
-                Alterar(b);
-            foreach (Beneficiario b in inserir)
-                Incluir(b);
+        public bool AlterarListaBeneficiarios(long idCliente, List<Beneficiario> listaNova, AcessoDados acesso)
+        {
+            try
+            {
+                //nomalizar cpf na nova lista
+                foreach(Beneficiario item in listaNova) 
+                {
+                    item.CPF = CPFNormalizer.NormalizeCPF(item.CPF);
+                }
+                //buscar todos os Beneficiarios
+                List<Beneficiario> beneficiariosAtual = Pesquisa(idCliente);
+                var inserir = listaNova
+                .Where(n => !beneficiariosAtual.Any(a => a.CPF == n.CPF))
+                .Select(n =>
+                {
+                    n.IdCliente = idCliente;
+                    return n;
+                })
+                .ToList();
+                var atualizar = listaNova
+                .Where(n => beneficiariosAtual.Any(a => a.CPF == n.CPF))
+                .Select(n =>
+                {
+                    var existente = beneficiariosAtual.First(a => a.CPF == n.CPF);
+                    n.Id = existente.Id;
+                    n.IdCliente = existente.IdCliente;
+                    return n;
+                })
+                .ToList();
+                var deletar = beneficiariosAtual.Where(a => !listaNova.Any(n => n.CPF == a.CPF)).ToList();
+
+                foreach (Beneficiario b in deletar)
+                    Excluir(b.Id, b.IdCliente, acesso);
+                foreach (Beneficiario b in atualizar)
+                    Alterar(b, acesso);
+                foreach (Beneficiario b in inserir)
+                    Incluir(b, acesso);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+
         }
     }
 }

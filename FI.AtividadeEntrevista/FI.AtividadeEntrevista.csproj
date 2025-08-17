@@ -47,6 +47,7 @@
     <Compile Include="BLL\Validations\CPFNormalizer.cs" />
     <Compile Include="DAL\Beneficiarios\DaoBeneficiario.cs" />
     <Compile Include="DAL\Clientes\DaoCliente.cs" />
+    <Compile Include="DAL\Padrao\ConexaoBanco.cs" />
     <Compile Include="DAL\Padrao\FI.AcessoDados.cs" />
     <Compile Include="DML\Beneficiario.cs" />
     <Compile Include="DML\Cliente.cs" />

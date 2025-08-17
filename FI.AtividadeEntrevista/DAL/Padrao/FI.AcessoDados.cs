@@ -2,70 +2,52 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using FI.AtividadeEntrevista.DAL.Padrao;
 
 namespace FI.AtividadeEntrevista.DAL
 {
-    internal class AcessoDados
+    public class AcessoDados
     {
-        private string stringDeConexao
+        private readonly ConexaoBanco _conexaoBanco;
+
+        public AcessoDados(ConexaoBanco conexaoBanco)
         {
-            get
-            {
-                ConnectionStringSettings conn = ConfigurationManager.ConnectionStrings["BancoDeDados"];
-                if (conn != null)
-                    return conn.ConnectionString;
-                else
-                    return string.Empty;
-            }
+            _conexaoBanco = conexaoBanco;
         }
 
         internal void Executar(string NomeProcedure, List<SqlParameter> parametros)
         {
-            SqlCommand comando = new SqlCommand();
-            SqlConnection conexao = new SqlConnection(stringDeConexao);
-            comando.Connection = conexao;
-            comando.CommandType = CommandType.StoredProcedure;
-            comando.CommandText = NomeProcedure;
-            foreach (var item in parametros)
-                comando.Parameters.Add(item);
+            using (SqlCommand comando = new SqlCommand(NomeProcedure, _conexaoBanco.Conexao))
+            {
+                comando.CommandType = CommandType.StoredProcedure;
 
-            conexao.Open();
-            try
-            {
+                if (_conexaoBanco.Transacao != null)
+                    comando.Transaction = _conexaoBanco.Transacao;
+
+                if (parametros != null)
+                    comando.Parameters.AddRange(parametros.ToArray());
+
                 comando.ExecuteNonQuery();
-            }
-            finally
-            {
-                conexao.Close();
             }
         }
 
         internal DataSet Consultar(string NomeProcedure, List<SqlParameter> parametros)
         {
-            SqlCommand comando = new SqlCommand();
-            SqlConnection conexao = new SqlConnection(stringDeConexao);
-
-            comando.Connection = conexao;
-            comando.CommandType = CommandType.StoredProcedure;
-            comando.CommandText = NomeProcedure;
-            foreach (var item in parametros)
-                comando.Parameters.Add(item);
-
-            SqlDataAdapter adapter = new SqlDataAdapter(comando);
-            DataSet ds = new DataSet();
-            conexao.Open();
-
-            try
+            using (SqlCommand comando = new SqlCommand(NomeProcedure, _conexaoBanco.Conexao))
             {
+                comando.CommandType = CommandType.StoredProcedure;
+
+                if (_conexaoBanco.Transacao != null)
+                    comando.Transaction = _conexaoBanco.Transacao;
+
+                if (parametros != null)
+                    comando.Parameters.AddRange(parametros.ToArray());
+
+                SqlDataAdapter adapter = new SqlDataAdapter(comando);
+                DataSet ds = new DataSet();
                 adapter.Fill(ds);
+                return ds;
             }
-            finally
-            {
-                conexao.Close();
-            }
-
-            return ds;
         }
-
     }
 }
